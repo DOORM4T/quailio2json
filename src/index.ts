@@ -2,6 +2,8 @@
 import { Command } from 'commander'
 import fs from 'fs'
 import path from 'path'
+import { getAllParsedWithRelNames } from './getParsedWithRelNames'
+import { getUuidToDataMap } from './getUuidToDataMap'
 import { getParsedNodes } from './parsedActivities'
 import { IQuailioNetworkJSON } from './types'
 
@@ -13,20 +15,34 @@ program
   )
   .argument('<input-file>', 'Input Quailio JSON')
   .argument('[output-file]', 'Output general-purpose JSON')
-  .action((input: string, output?: string) => {
+  .option('-r, --rels', 'Show relationship names instead of IDs', false)
+  .action((inFile: string, outFile?: string) => {
+    const { rels } = program.opts()
+
     try {
-      const inputFile = fs.readFileSync(path.resolve(input), {
+      const inputFile = fs.readFileSync(path.resolve(inFile), {
         encoding: 'utf-8',
       })
       const inputJSON = JSON.parse(inputFile) as IQuailioNetworkJSON
       const parsedNodes = getParsedNodes(inputJSON.people)
 
-      if (output === undefined) return
-      const parsedPath = path.parse(output)
+      const result = rels
+        ? getAllParsedWithRelNames(
+            getUuidToDataMap(inputJSON.people),
+            parsedNodes,
+          )
+        : parsedNodes
+
+      if (outFile === undefined) {
+        console.log(result)
+        return
+      }
+
+      const parsedPath = path.parse(outFile)
       if (!fs.existsSync(parsedPath.dir)) {
         fs.mkdirSync(parsedPath.dir, { recursive: true })
       }
-      fs.writeFileSync(output, JSON.stringify(parsedNodes), 'utf-8')
+      fs.writeFileSync(outFile, JSON.stringify(result), 'utf-8')
     } catch (error) {
       console.error(error)
     }
