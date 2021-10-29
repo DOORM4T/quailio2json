@@ -16,6 +16,7 @@ export interface IQuailioNetworkJSON {
 interface IOutputNode {
   id: string
   name: string
+  content: string
 }
 
 export interface IParsedNode extends IOutputNode {

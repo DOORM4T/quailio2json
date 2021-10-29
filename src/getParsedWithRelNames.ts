@@ -14,8 +14,8 @@ export function getParsedWithRelNames(
   uuidToData: UUIDToDataMap,
   parsedNode: IParsedNode,
 ): IParsedWithRelatedStrings {
-  const { id, name } = parsedNode
+  const { id, name, content } = parsedNode
   const relatedUuids = parsedNode.relatedIds.map((id) => uuidToData[id].id)
   const related = relatedUuids.map((uuid) => uuidToData[uuid].name)
-  return { id, name, related }
+  return { id, name, related, content }
 }
